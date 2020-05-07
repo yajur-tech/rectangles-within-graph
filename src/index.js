@@ -103,79 +103,96 @@ let barData = {
 };
 
 window.addEventListener("load", (event) => {
-
-
   aggGraphSvgModerate = createSvgForDiv(aggGraphWidth, aggGraphWidth, "#aggGraphModerate", "aggGraphSvgModerate");
 
   aggGraphSvgModerateDetails = setupGraph(aggGraphSvgModerate, aggGraphWidth, aggGraphHeight, aggGraphPadding, "Rectangles in Graph", [0,1,2,3,4], [0,1,2,3,4], "X Values", "Y Values");
 
-  console.log(barData[0]["a"]);
+  var idx = 0;
+  timerFunction(idx);
 
-  // TODO1: The problem here is that the rectangle height is not being set correctly. What we want is that if the value of the height in bar data is 0.0625 it means it should be 6.25% of the section height. Each square is considered a section in the graph. If the data in barData is 1 it means it should fill up the section. 
-  let aRects = aggGraphSvgModerateDetails.graphSvg.selectAll(".a")
-                            .data(barData[0]["a"])
-                            .enter()
-                            .append("rect")
-                            // .attr("transform", d => {
-                            //   let xVal = d.split("")[0];
-                            //   let yVal = d.split("")[1];
-                            //   "translate(" + aggGraphSvgModerateDetails.xScale(xVal) + 30 + "," +  aggGraphSvgModerateDetails.yScale(yVal) + ") rotate(90)"
-                            // })
-                            .attr("x", d => {
-                              let xVal = Object.keys(d)[0].split("")[0];
-                              return aggGraphSvgModerateDetails.xScale(xVal) + 30
-                            })
-                            .attr("y", d => {
-                              let yVal = Object.keys(d)[0].split("")[1];
-                              return aggGraphSvgModerateDetails.yScale(yVal);
-                            })
-                            .attr("width", d=> {
-                              return 10;
-                            })
-                            .attr("height", d=> {
-                              return (aggGraphSvgModerateDetails.yScale(0) - aggGraphSvgModerateDetails.yScale(1)) * d[Object.keys(d)[0]]   ;
-                            })
-                            .attr("fill", d => {
-                              return colors["a"];
-                            })
-  
-  let bRects = aggGraphSvgModerateDetails.graphSvg.selectAll(".b")
-                          .data(barData[0]["b"])
-                          .enter()
-                          .append("rect")
-                          // .attr("transform", d => {
-                          //   let xVal = d.split("")[0];
-                          //   let yVal = d.split("")[1];
-                          //   "translate(" + aggGraphSvgModerateDetails.xScale(xVal) + 30 + "," +  aggGraphSvgModerateDetails.yScale(yVal) + ") rotate(90)"
-                          // })
-                          .attr("x", d => {
-                            let xVal = Object.keys(d)[0].split("")[0];
-                            return aggGraphSvgModerateDetails.xScale(xVal) + 50
-                          })
-                          .attr("y", d => {
-                            let yVal = Object.keys(d)[0].split("")[1];
-                            return aggGraphSvgModerateDetails.yScale(yVal);
-                          })
-                          .attr("width", d=> {
-                            return 10;
-                          })
-                          .attr("height", d=> {
-                            return (aggGraphSvgModerateDetails.yScale(0) - aggGraphSvgModerateDetails.yScale(1)) * d[Object.keys(d)[0]]  ;
-                          })
-                          .attr("fill", d => {
-                            return colors["b"];
-                          })
-                            
-  console.log(aggGraphSvgModerateDetails.graphSvg)
-
-  timerFunction();
-
+  d3.interval(() => {
+    idx = idx === 0 ? 0.5 : 0;
+    timerFunction(idx);
+  }, 1000);
 });
 
 
-function timerFunction() {
-  // write the code to transition from barData 0 to barData 0.5 so that we get the height values from 0.5
-   // so you will be using barData[0.5]
+function timerFunction(idx) {
+  // TODO1: The problem here is that the rectangle height is not being set correctly. What we want is that if the value of the height in bar data is 0.0625 it means it should be 6.25% of the section height. Each square is considered a section in the graph. If the data in barData is 1 it means it should fill up the section. 
+  let aRects = aggGraphSvgModerateDetails.graphSvg.selectAll("rect.a")
+    .data(barData[idx]["a"], (d) => Object.keys(d)[0])
+  
+  aRects.exit().remove()
+
+  aRects.attr("y", d => {
+    let yVal = Object.keys(d)[0].split("")[1];
+    return aggGraphSvgModerateDetails.yScale(yVal) - (aggGraphSvgModerateDetails.yScale(0) - aggGraphSvgModerateDetails.yScale(1)) * d[Object.keys(d)[0]];
+  })
+  .attr("height", d=> {
+    return (aggGraphSvgModerateDetails.yScale(0) - aggGraphSvgModerateDetails.yScale(1)) * d[Object.keys(d)[0]]   ;
+  })
+  
+  let aRectsEnter = aRects.enter()
+    .append("rect")
+    // .attr("transform", d => {
+    //   let xVal = d.split("")[0];
+    //   let yVal = d.split("")[1];
+    //   "translate(" + aggGraphSvgModerateDetails.xScale(xVal) + 30 + "," +  aggGraphSvgModerateDetails.yScale(yVal) + ") rotate(90)"
+    // })
+    .attr("x", d => {
+      let xVal = Object.keys(d)[0].split("")[0];
+      return aggGraphSvgModerateDetails.xScale(xVal) + 30
+    })
+    .attr("y", d => {
+      let yVal = Object.keys(d)[0].split("")[1];
+      return aggGraphSvgModerateDetails.yScale(yVal) - (aggGraphSvgModerateDetails.yScale(0) - aggGraphSvgModerateDetails.yScale(1)) * d[Object.keys(d)[0]];
+    })
+    .attr("width", d=> {
+      return 10;
+    })
+    .attr("height", d=> {
+      return (aggGraphSvgModerateDetails.yScale(0) - aggGraphSvgModerateDetails.yScale(1)) * d[Object.keys(d)[0]]   ;
+    })
+    .attr("fill", d => {
+      return colors["a"];
+    })
+    .attr("class", "a")
+  
+  
+  let bRects = aggGraphSvgModerateDetails.graphSvg.selectAll("rect.b")
+    .data(barData[idx]["b"], (d) => Object.keys(d)[0])
+  
+  bRects.exit().remove()
+
+  bRects.attr("y", d => {
+    let yVal = Object.keys(d)[0].split("")[1];
+    return aggGraphSvgModerateDetails.yScale(yVal) - (aggGraphSvgModerateDetails.yScale(0) - aggGraphSvgModerateDetails.yScale(1)) * d[Object.keys(d)[0]];
+  }).attr("height", d=> {
+    return (aggGraphSvgModerateDetails.yScale(0) - aggGraphSvgModerateDetails.yScale(1)) * d[Object.keys(d)[0]]  ;
+  })
+
+  let bRectsEnter =  bRects.enter()
+    .append("rect")
+    .attr("x", d => {
+      let xVal = Object.keys(d)[0].split("")[0];
+      return aggGraphSvgModerateDetails.xScale(xVal) + 50
+    })
+    .attr("y", d => {
+      let yVal = Object.keys(d)[0].split("")[1];
+      return aggGraphSvgModerateDetails.yScale(yVal) - (aggGraphSvgModerateDetails.yScale(0) - aggGraphSvgModerateDetails.yScale(1)) * d[Object.keys(d)[0]];
+    })
+    .attr("width", d=> {
+      return 10;
+    })
+    .attr("height", d=> {
+      return (aggGraphSvgModerateDetails.yScale(0) - aggGraphSvgModerateDetails.yScale(1)) * d[Object.keys(d)[0]]  ;
+    })
+    .attr("fill", d => {
+      return colors["b"];
+    })
+    .attr("class", "b")
+  
+  
 }
 
 
